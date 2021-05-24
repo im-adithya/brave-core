@@ -41,6 +41,7 @@
 #include "bat/ads/resources/grit/bat_ads_resources.h"
 #include "bat/ads/statement_info.h"
 #include "brave/browser/brave_ads/notifications/ad_notification_platform_bridge.h"
+#include "brave/browser/brave_ads/tooltips/ad_tooltip_platform_bridge.h"
 #include "brave/browser/brave_browser_process.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
 #include "brave/browser/profiles/profile_util.h"
@@ -218,7 +219,8 @@ AdsServiceImpl::AdsServiceImpl(Profile* profile,
       display_service_(NotificationDisplayService::GetForProfile(profile_)),
       rewards_service_(
           brave_rewards::RewardsServiceFactory::GetForProfile(profile_)),
-      bat_ads_client_receiver_(new bat_ads::AdsClientMojoBridge(this)) {
+      bat_ads_client_receiver_(new bat_ads::AdsClientMojoBridge(this)),
+      adaptive_captcha_(profile_) {
   DCHECK(profile_);
   DCHECK(history_service_);
   DCHECK(brave::IsRegularProfile(profile_));
@@ -1004,6 +1006,27 @@ void AdsServiceImpl::OnClickAdNotification(const std::string& notification_id) {
 
   bat_ads_->OnAdNotificationEvent(notification_id,
                                   ads::AdNotificationEventType::kClicked);
+}
+
+void AdsServiceImpl::OnShowTooltip(const std::string& tooltip_id) {}
+
+void AdsServiceImpl::OnOkButtonPressedForTooltip(
+    const std::string& tooltip_id) {
+  if (tooltip_id != "captcha") {
+    return;
+  }
+
+  // User chose to solve the captcha now, so initiate that process
+  // rewards_service_->ShowScheduledCaptcha();
+}
+
+void AdsServiceImpl::OnCancelButtonPressedForTooltip(
+    const std::string& tooltip_id) {
+  if (tooltip_id != "captcha") {
+    return;
+  }
+
+  // In this context, cancel means snooze the captcha for now
 }
 
 void AdsServiceImpl::MaybeOpenNewTabWithAd() {
@@ -2069,6 +2092,38 @@ void AdsServiceImpl::Load(const std::string& name, ads::LoadCallback callback) {
 std::string AdsServiceImpl::LoadResourceForId(const std::string& id) {
   const auto resource_id = GetSchemaResourceId(id);
   return LoadDataResourceAndDecompressIfNeeded(resource_id);
+}
+
+void AdsServiceImpl::GetScheduledCaptcha(
+    const std::string& payment_id,
+    ads::GetScheduledCaptchaCallback callback) {
+  adaptive_captcha_.GetScheduledCaptcha(
+      payment_id, base::BindOnce(&AdsServiceImpl::OnGetScheduledCaptcha,
+                                 AsWeakPtr(), std::move(callback)));
+}
+
+void AdsServiceImpl::OnGetScheduledCaptcha(
+    ads::GetScheduledCaptchaCallback callback,
+    const std::string& captcha_id) {
+  callback(captcha_id);
+}
+
+void AdsServiceImpl::ShowScheduledCaptchaNotification(
+    const std::string& captcha_id) {
+  const std::u16string title = u"Brave Ads paused";
+  const std::u16string body =
+      u"To keep Brave Rewards safe from abuse, we'll randomly ask users to "
+      u"solve a captcha. Click \"Solve\" to resume ads.";
+  const std::u16string ok_button_text = u"Solve";
+  const std::u16string cancel_button_text = u"Later";
+
+  const brave_tooltips::BraveTooltipAttributes attributes(
+      title, body, ok_button_text, cancel_button_text);
+  brave_tooltips::BraveTooltip tooltip("captcha", attributes, nullptr);
+
+  std::unique_ptr<AdTooltipPlatformBridge> platform_bridge =
+      std::make_unique<AdTooltipPlatformBridge>(profile_);
+  platform_bridge->ShowTooltip(tooltip);
 }
 
 ads::DBCommandResponsePtr RunDBTransactionOnFileTaskRunner(

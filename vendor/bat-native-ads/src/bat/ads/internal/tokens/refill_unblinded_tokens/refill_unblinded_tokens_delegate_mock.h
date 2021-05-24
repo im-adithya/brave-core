@@ -28,6 +28,10 @@ class RefillUnblindedTokensDelegateMock : public RefillUnblindedTokensDelegate {
 
   MOCK_METHOD(void, OnWillRetryRefillingUnblindedTokens, ());
   MOCK_METHOD(void, OnDidRetryRefillingUnblindedTokens, ());
+
+  MOCK_METHOD(void,
+              OnCaptchaRequiredToRefillUnblindedTokens,
+              (const std::string& captcha_id));
 };
 
 }  // namespace ads

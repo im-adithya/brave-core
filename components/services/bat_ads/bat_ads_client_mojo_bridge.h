@@ -76,6 +76,11 @@ class BatAdsClientMojoBridge
   std::string LoadResourceForId(
       const std::string& id) override;
 
+  void GetScheduledCaptcha(const std::string& payment_id,
+                           ads::GetScheduledCaptchaCallback callback) override;
+
+  void ShowScheduledCaptchaNotification(const std::string& captcha_id) override;
+
   void RunDBTransaction(
       ads::DBTransactionPtr transaction,
       ads::RunDBTransactionCallback callback) override;
