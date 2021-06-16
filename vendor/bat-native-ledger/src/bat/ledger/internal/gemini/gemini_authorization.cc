@@ -172,25 +172,11 @@ void GeminiAuthorization::OnPostAccount(
   wallet_ptr->address = address;
   wallet_ptr->user_name = name;
 
-  /*TODO(@jumde) - Move to OnClaimWallet once the promotion
-   *               server is fixed.
-   */
-  switch (wallet_ptr->status) {
-    case type::WalletStatus::NOT_CONNECTED:
-    case type::WalletStatus::DISCONNECTED_NOT_VERIFIED:
-    case type::WalletStatus::DISCONNECTED_VERIFIED:
-      wallet_ptr->status = type::WalletStatus::VERIFIED;
-      break;
-    default:
-      break;
-  }
-
   ledger_->gemini()->SetWallet(wallet_ptr->Clone());
-  callback(type::Result::LEDGER_OK, {});
 
-  /*auto url_callback =
+  auto url_callback =
       std::bind(&GeminiAuthorization::OnClaimWallet, this, _1, token, callback);
-  promotion_server_->post_claim_gemini()->Request(linking_info, url_callback);*/
+  promotion_server_->post_claim_gemini()->Request(linking_info, url_callback);
 }
 
 void GeminiAuthorization::OnClaimWallet(
