@@ -14,7 +14,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
+import android.net.Ikev2VpnProfile;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -99,6 +105,7 @@ import org.chromium.chrome.browser.toolbar.top.BraveToolbarLayout;
 import org.chromium.chrome.browser.util.BraveDbUtil;
 import org.chromium.chrome.browser.util.BraveReferrer;
 import org.chromium.chrome.browser.util.PackageUtils;
+import org.chromium.chrome.browser.vpn.BraveVpnUtils;
 import org.chromium.chrome.browser.vpn.VpnCalloutDialogFragment;
 import org.chromium.chrome.browser.widget.crypto.binance.BinanceAccountBalance;
 import org.chromium.chrome.browser.widget.crypto.binance.BinanceWidgetManager;
@@ -127,6 +134,7 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     public static final int SITE_BANNER_REQUEST_CODE = 33;
     public static final int VERIFY_WALLET_ACTIVITY_REQUEST_CODE = 34;
     public static final int USER_WALLET_ACTIVITY_REQUEST_CODE = 35;
+    public static final int BRAVE_VPN_PROFILE_REQUEST_CODE = 36;
     public static final String ADD_FUNDS_URL = "chrome://rewards/#add-funds";
     public static final String REWARDS_SETTINGS_URL = "chrome://rewards/";
     public static final String BRAVE_REWARDS_SETTINGS_URL = "brave://rewards/";
@@ -164,8 +172,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     private static final List<String> yandexRegions =
             Arrays.asList("AM", "AZ", "BY", "KG", "KZ", "MD", "RU", "TJ", "TM", "UZ");
 
-    public static boolean isBraveVpnEnabled = false;
-
     public final class DialogOption {
         public static final int CLEAR_HISTORY = 0;
         public static final int CLEAR_COOKIES_AND_SITE_DATA = 1;
@@ -175,6 +181,8 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         public static final int CLEAR_SITE_SETTINGS = 5;
         public static final int NUM_ENTRIES = 6;
     }
+
+    private VpnManager vpnManager;
 
     public BraveActivity() {
         // Disable key checker to avoid asserts on Brave keys in debug
@@ -213,7 +221,7 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         } else if (id == R.id.brave_wallet_id) {
             openBraveWallet();
         } else if (id == R.id.request_brave_vpn_id || id == R.id.request_brave_vpn_check_id) {
-            isBraveVpnEnabled = !isBraveVpnEnabled;
+            startStopVpn();
         } else {
             return false;
         }
@@ -296,6 +304,16 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     @Override
     public void finishNativeInitialization() {
         super.finishNativeInitialization();
+
+        vpnManager = (VpnManager) getSystemService(Context.VPN_MANAGEMENT_SERVICE);
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest networkRequest =
+                new NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                        .build();
+        connectivityManager.registerNetworkCallback(networkRequest, mNetworkCallback);
 
         if (SharedPreferencesManager.getInstance().readBoolean(
                     BravePreferenceKeys.BRAVE_DOUBLE_RESTART, false)) {
@@ -465,6 +483,33 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         Intent cryptoWalletIntent = new Intent(this, CryptoWalletActivity.class);
         cryptoWalletIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(cryptoWalletIntent);
+    }
+
+    private final ConnectivityManager.NetworkCallback mNetworkCallback =
+            new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    // runOnUiThread(() -> updateStatus());
+                }
+
+                @Override
+                public void onLost(Network network) {
+                    // runOnUiThread(() -> updateStatus());
+                }
+            };
+
+    private void startStopVpn() {
+        if (vpnManager != null && BraveVpnUtils.isVPNConnected(BraveActivity.this)) {
+            try {
+                vpnManager.startProvisionedVpnProfile();
+            } catch (SecurityException securityException) {
+                Ikev2VpnProfile ikev2VpnProfile = VpnUtils.getVpnProfile(MainActivity.this);
+                Intent intent = vpnManager.provisionVpnProfile(ikev2VpnProfile);
+                startActivityForResult(intent, BRAVE_VPN_PROFILE_REQUEST_CODE);
+            }
+        } else {
+            vpnManager.stopProvisionedVpnProfile();
+        }
     }
 
     private void checkSetDefaultBrowserModal() {
@@ -785,6 +830,8 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
             if (! TextUtils.isEmpty(open_url)) {
                 openNewOrSelectExistingTab(open_url);
             }
+        } else if (resultCode == RESULT_OK && requestCode == BRAVE_VPN_PROFILE_REQUEST_CODE) {
+            vpnManager.startProvisionedVpnProfile();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
