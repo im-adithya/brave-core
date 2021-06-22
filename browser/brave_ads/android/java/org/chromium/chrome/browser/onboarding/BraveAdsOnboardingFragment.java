@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -22,15 +23,17 @@ import android.widget.TextView;
 import com.airbnb.lottie.LottieAnimationView;
 
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.firstrun.FirstRunFragment;
 import org.chromium.chrome.browser.notifications.BraveOnboardingNotification;
 import org.chromium.chrome.browser.onboarding.OnViewPagerAction;
 import org.chromium.chrome.browser.onboarding.OnboardingPrefManager;
 
-public class BraveAdsOnboardingFragment extends Fragment {
+public class BraveAdsOnboardingFragment extends Fragment implements FirstRunFragment {
     private OnViewPagerAction onViewPagerAction;
 
     private int progress;
     private int endTime = 3;
+    private boolean mNativeInitialized;
 
     private LottieAnimationView animatedView;
 
@@ -71,12 +74,25 @@ public class BraveAdsOnboardingFragment extends Fragment {
             tvTitle.setVisibility(View.VISIBLE);
             actionLayout.setVisibility(View.GONE);
             btnDidntSeeAd.setVisibility(View.GONE);
-            startCountdown();
             OnboardingPrefManager.isNotification = true;
             if (animatedView != null) {
                 animatedView.playAnimation();
             }
         }
+    }
+    
+    @Override
+    public void onNativeInitialized() {
+        assert !mNativeInitialized;
+
+        mNativeInitialized = true;
+        startCountdown();
+    }
+
+    @Override
+    public void setInitialA11yFocus() {
+        if (tvTitle == null) return;
+        tvTitle.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
     }
 
     private void setActions() {
