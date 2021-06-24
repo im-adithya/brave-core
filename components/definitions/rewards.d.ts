@@ -49,7 +49,7 @@ declare namespace Rewards {
       github: boolean
     }
     excludedList: ExcludedPublisher[]
-    externalWalletProviderList: ExternalWalletProvider[]
+    externalWalletProviderList: string[]
     firstLoad: boolean | null
     monthlyReport: MonthlyReport
     monthlyReportIds: string[]

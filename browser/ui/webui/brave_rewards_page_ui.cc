@@ -2002,7 +2002,13 @@ void RewardsDOMHandler::GetExternalWalletProviders(
     return;
 
   AllowJavascript();
-  base::Value data = rewards_service_->GetExternalWalletProviders();
+  base::Value data(base::Value::Type::LIST);
+
+  std::vector<std::string> providers = rewards_service_->GetExternalWalletProviders();
+  for (std::string provider : providers) {
+    data.Append(provider);
+  }
+
   CallJavascriptFunction("brave_rewards.externalWalletProviderList", data);
 }
 

@@ -74,7 +74,11 @@ export const getCurrentBalanceReport = () => {
 }
 
 export const getWalletProviderName = (wallet?: Rewards.ExternalWallet) => {
-  switch (wallet ? wallet.type : '') {
+  return getWalletProviderNameFromWalletType(wallet ? wallet.type : '')
+}
+
+export const getWalletProviderNameFromWalletType = (walletType: string) => {
+  switch (walletType) {
     case 'uphold' : return 'Uphold'
     case 'bitflyer': return 'bitFlyer'
     case 'gemini': return 'Gemini'

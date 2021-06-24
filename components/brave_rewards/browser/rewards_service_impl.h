@@ -293,7 +293,7 @@ class RewardsServiceImpl : public RewardsService,
 
   void GetExternalWallet(GetExternalWalletCallback callback) override;
 
-  base::Value GetExternalWalletProviders() override;
+  std::vector<std::string> GetExternalWalletProviders() override;
 
   void ExternalWalletAuthorization(
       const std::string& wallet_type,

@@ -1298,29 +1298,22 @@ void RewardsServiceImpl::OnRecoverWallet(const ledger::type::Result result) {
   }
 }
 
-base::Value RewardsServiceImpl::GetExternalWalletProviders() {
-  base::Value data(base::Value::Type::LIST);
-  base::Value provider(base::Value::Type::DICTIONARY);
+std::vector<std::string> RewardsServiceImpl::GetExternalWalletProviders() {
+  std::vector<std::string> providers;
 
   if (IsBitFlyerRegion()) {
-    provider.SetStringKey("type", "bitflyer");
-    provider.SetStringKey("name", "bitFlyer");
-    data.Append(std::move(provider));
-    return data;
+    providers.push_back(ledger::constant::kWalletBitflyer);
+    return providers;
   }
 
-  provider.SetStringKey("type", "uphold");
-  provider.SetStringKey("name", "Uphold");
-  data.Append(std::move(provider));
+  providers.push_back(ledger::constant::kWalletUphold);
 
 #if !defined(OS_ANDROID)
   if (base::FeatureList::IsEnabled(features::kGeminiFeature)) {
-    provider.SetStringKey("type", "gemini");
-    provider.SetStringKey("name", "Gemini");
-    data.Append(std::move(provider));
+    providers.push_back(ledger::constant::kWalletGemini);
   }
 #endif
-  return data;
+  return providers;
 }
 
 void RewardsServiceImpl::AttestPromotion(

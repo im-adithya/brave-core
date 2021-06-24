@@ -33,7 +33,7 @@ function renderProviderIcon (provider: string) {
 
 type ModalState = 'info' | 'select'
 
-interface ExternalWalletProvider {
+export interface ExternalWalletProvider {
   type: string
   name: string
 }
