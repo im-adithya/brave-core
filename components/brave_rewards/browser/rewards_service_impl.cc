@@ -2832,14 +2832,13 @@ void RewardsServiceImpl::OnGetExternalWallet(
 }
 
 void RewardsServiceImpl::GetExternalWallet(GetExternalWalletCallback callback) {
-  std::string wallet_type = GetExternalWalletType();
   if (!Connected()) {
     std::move(callback).Run(ledger::type::Result::LEDGER_OK, nullptr);
     return;
   }
 
   bat_ledger_->GetExternalWallet(
-      wallet_type,
+      GetExternalWalletType(),
       base::BindOnce(&RewardsServiceImpl::OnGetExternalWallet, AsWeakPtr(),
                      std::move(callback)));
 }
@@ -3469,7 +3468,7 @@ std::string RewardsServiceImpl::GetExternalWalletType() const {
   return profile_->GetPrefs()->GetString(prefs::kWalletType);
 }
 
-void RewardsServiceImpl::SetSelectedWallet(const std::string wallet_type) {
+void RewardsServiceImpl::SetExternalWalletType(const std::string wallet_type) {
   profile_->GetPrefs()->SetString(prefs::kWalletType, wallet_type);
 }
 

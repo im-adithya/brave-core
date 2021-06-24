@@ -190,7 +190,7 @@ class RewardsServiceImpl : public RewardsService,
   void SetPublisherExclude(
       const std::string& publisher_key,
       bool exclude) override;
-  void SetSelectedWallet(const std::string wallet_type) override;
+  void SetExternalWalletType(const std::string wallet_type) override;
 
   RewardsNotificationService* GetNotificationService() const override;
   void SetBackupCompleted() override;

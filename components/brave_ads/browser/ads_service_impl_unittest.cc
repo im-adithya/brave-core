@@ -240,7 +240,7 @@ class MockRewardsService : public RewardsService {
 
   MOCK_METHOD1(SetAdsEnabled, void(const bool is_enabled));
   MOCK_METHOD0(GetExternalWalletProviders, base::Value());
-  MOCK_METHOD1(SetSelectedWallet,
+  MOCK_METHOD1(SetExternalWalletType,
                void(const std::string));
 
   MOCK_CONST_METHOD0(IsRewardsEnabled, bool());

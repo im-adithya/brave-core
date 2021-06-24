@@ -203,7 +203,7 @@ class RewardsDOMHandler : public WebUIMessageHandler,
   void GetOnboardingStatus(const base::ListValue* args);
   void SaveOnboardingResult(const base::ListValue* args);
   void GetExternalWalletProviders(const base::ListValue* args);
-  void SetSelectedWallet(const base::ListValue* args);
+  void SetExternalWalletType(const base::ListValue* args);
 
   // RewardsServiceObserver implementation
   void OnRewardsInitialized(
@@ -486,8 +486,8 @@ void RewardsDOMHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback("brave_rewards.getExternalWalletProviders",
       base::BindRepeating(&RewardsDOMHandler::GetExternalWalletProviders,
       base::Unretained(this)));
-  web_ui()->RegisterMessageCallback("brave_rewards.setSelectedWallet",
-      base::BindRepeating(&RewardsDOMHandler::SetSelectedWallet,
+  web_ui()->RegisterMessageCallback("brave_rewards.setExternalWalletType",
+      base::BindRepeating(&RewardsDOMHandler::SetExternalWalletType,
       base::Unretained(this)));
 }
 
@@ -582,7 +582,7 @@ void RewardsDOMHandler::GetAutoContributeProperties(
                      weak_factory_.GetWeakPtr()));
 }
 
-void RewardsDOMHandler::SetSelectedWallet(
+void RewardsDOMHandler::SetExternalWalletType(
     const base::ListValue* args) {
   CHECK_EQ(1U, args->GetSize());
   if (!rewards_service_)
@@ -590,7 +590,7 @@ void RewardsDOMHandler::SetSelectedWallet(
 
   AllowJavascript();
   const std::string wallet_type = args->GetList()[0].GetString();
-  rewards_service_->SetSelectedWallet(wallet_type);
+  rewards_service_->SetExternalWalletType(wallet_type);
   rewards_service_->GetExternalWallet(base::BindOnce(
       &RewardsDOMHandler::OnExternalWalletSelected,
       weak_factory_.GetWeakPtr()));

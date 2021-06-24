@@ -368,7 +368,7 @@ class RewardsService : public KeyedService {
 
   virtual bool IsRewardsEnabled() const = 0;
 
-  virtual void SetSelectedWallet(const std::string wallet_type) = 0;
+  virtual void SetExternalWalletType(const std::string wallet_type) = 0;
 
  protected:
   base::ObserverList<RewardsServiceObserver> observers_;

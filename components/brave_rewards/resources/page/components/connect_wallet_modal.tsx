@@ -155,7 +155,7 @@ export function ConnectWalletModal (props: Props) {
                   setShowMinimumBalanceWarning(true)
                 } else {
                   setShowMinimumBalanceWarning(false)
-                  chrome.send('brave_rewards.setSelectedWallet', [provider.type])
+                  chrome.send('brave_rewards.setExternalWalletType', [provider.type])
                   props.onContinue(provider.type)
                 }
               }
