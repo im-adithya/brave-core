@@ -24,7 +24,7 @@ import * as rewardsActions from '../actions/rewards_actions'
 import * as utils from '../utils'
 import { ExtendedActivityRow, SummaryItem, SummaryType } from '../../ui/components/modalActivity'
 import { DetailRow as TransactionRow } from '../../ui/components/tableTransactions'
-import { ConnectWalletModal, ExternalWalletProvider } from './connect_wallet_modal'
+import { ConnectWalletModal } from './connect_wallet_modal'
 
 interface State {
   activeTabId: number
@@ -777,17 +777,9 @@ class PageWallet extends React.Component<Props, State> {
     return ''
   }
 
-  generateExternalWalletProviderList = (providers: string[]) => {
-    var externalWalletProviderList = []
-    for (var provider of providers) {
-      let providerName = utils.getWalletProviderNameFromWalletType(provider)
-      let externalWalletProvider: ExternalWalletProvider = {
-        type: provider,
-        name: providerName
-      }
-      externalWalletProviderList.push(externalWalletProvider)
-    }
-    return externalWalletProviderList
+  generateExternalWalletProviderList = (walletProviders: string[]) => {
+    let externalWalletProviders = walletProviders.map((type) => ({ type, name: utils.getWalletProviderName(type) }))
+    return externalWalletProviders
   }
 
   render () {
