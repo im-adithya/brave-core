@@ -768,12 +768,6 @@ export class Panel extends React.Component<Props, State> {
     )
   }
 
-  onVerifyClick = () => {
-    chrome.tabs.create({
-        url: 'brave://rewards/#verify'
-    })
-  }
-
   render () {
     const { pendingContributionTotal, enabledAC, externalWallet, balance, parameters } = this.props.rewardsPanelData
     const publisher: RewardsExtension.Publisher | undefined = this.getPublisher()
@@ -800,6 +794,7 @@ export class Panel extends React.Component<Props, State> {
     let currentPromotion = this.getCurrentPromotion()
 
     const walletStatus = utils.getWalletStatus(externalWallet)
+    const onVerifyClick = utils.handleExternalWalletLink.bind(this, balance, externalWallet)
 
     return (
       <WalletWrapper
@@ -820,7 +815,7 @@ export class Panel extends React.Component<Props, State> {
         walletType={externalWallet ? externalWallet.type : undefined}
         walletState={walletStatus}
         walletProvider={utils.getWalletProviderName(externalWallet)}
-        onVerifyClick={this.onVerifyClick}
+        onVerifyClick={onVerifyClick}
         onDisconnectClick={this.onDisconnectClick}
         goToExternalWallet={this.goToExternalWallet}
         greetings={utils.getGreetings(externalWallet)}
