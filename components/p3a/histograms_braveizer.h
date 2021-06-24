@@ -18,6 +18,8 @@ namespace brave {
 class HistogramsBraveizer
     : public base::RefCountedThreadSafe<HistogramsBraveizer> {
  public:
+  static scoped_refptr<brave::HistogramsBraveizer> Create();
+
   HistogramsBraveizer();
 
   HistogramsBraveizer(const HistogramsBraveizer&) = delete;

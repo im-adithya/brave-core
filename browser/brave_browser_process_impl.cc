@@ -128,7 +128,7 @@ BraveBrowserProcessImpl::BraveBrowserProcessImpl(StartupData* startup_data)
   // Create P3A Service early to catch more histograms. The full initialization
   // should be started once browser process impl is ready.
   brave_p3a_service();
-  histogram_braveizer_ = base::MakeRefCounted<brave::HistogramsBraveizer>();
+  histogram_braveizer_ = brave::HistogramsBraveizer::Create();
 #endif  // BUILDFLAG(BRAVE_P3A_ENABLED)
 }
 

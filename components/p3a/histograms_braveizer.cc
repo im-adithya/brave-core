@@ -28,9 +28,14 @@ constexpr const char* kBravezationHistograms[] = {
 
 }  // namespace
 
-HistogramsBraveizer::HistogramsBraveizer() {
-  InitCallbacks();
+//static
+scoped_refptr<brave::HistogramsBraveizer> HistogramsBraveizer::Create() {
+  auto histogram_braveizer = base::MakeRefCounted<brave::HistogramsBraveizer>();
+  histogram_braveizer->InitCallbacks();
+  return histogram_braveizer;
 }
+
+HistogramsBraveizer::HistogramsBraveizer() = default;
 
 HistogramsBraveizer::~HistogramsBraveizer() = default;
 
