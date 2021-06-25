@@ -78,16 +78,11 @@ static_library("brave_test_support_unit") {
   }
 }
 
-test("brave_unit_tests") {
+static_library("net_unit_tests") {
   testonly = true
+  check_includes = false
 
   sources = [
-    "../../components/domain_reliability/test_util.cc",
-    "../../components/domain_reliability/test_util.h",
-    "//brave/browser/brave_content_browser_client_unittest.cc",
-    "//brave/browser/brave_resources_util_unittest.cc",
-    "//brave/browser/browsing_data/brave_browsing_data_remover_delegate_unittest.cc",
-    "//brave/browser/download/brave_download_item_model_unittest.cc",
     "//brave/browser/net/brave_ad_block_tp_network_delegate_helper_unittest.cc",
     "//brave/browser/net/brave_block_safebrowsing_urls_unittest.cc",
     "//brave/browser/net/brave_common_static_redirect_network_delegate_helper_unittest.cc",
@@ -96,7 +91,27 @@ test("brave_unit_tests") {
     "//brave/browser/net/brave_site_hacks_network_delegate_helper_unittest.cc",
     "//brave/browser/net/brave_static_redirect_network_delegate_helper_unittest.cc",
     "//brave/browser/net/brave_system_request_handler_unittest.cc",
-    "//brave/browser/profiles/profile_util_unittest.cc",
+  ]
+
+  deps = [
+    ":test_support",
+    "//base",
+    "//base/test:test_support",
+    "//brave/browser/net",
+    "//chrome/test:test_support",
+    "//services/network:test_support",
+    "//services/network/public/cpp",
+    "//skia",
+  ]
+
+  configs += [ "//brave/build/geolocation" ]
+}
+
+static_library("chromium_src_unit_tests") {
+  testonly = true
+  check_includes = false
+
+  sources = [
     "//brave/chromium_src/chrome/browser/history/history_utils_unittest.cc",
     "//brave/chromium_src/chrome/browser/lookalikes/lookalike_url_navigation_throttle_unittest.cc",
     "//brave/chromium_src/chrome/browser/signin/account_consistency_disabled_unittest.cc",
@@ -107,7 +122,22 @@ test("brave_unit_tests") {
     "//brave/chromium_src/components/version_info/brave_version_info_unittest.cc",
     "//brave/chromium_src/net/cookies/brave_canonical_cookie_unittest.cc",
     "//brave/chromium_src/services/network/public/cpp/cors/cors_unittest.cc",
-    "//brave/common/brave_content_client_unittest.cc",
+  ]
+
+  deps = [
+    ":test_support",
+    "//base",
+    "//base/test:test_support",
+    "//chrome/test:test_support",
+    "//skia",
+  ]
+}
+
+static_library("components_unit_tests") {
+  testonly = true
+  check_includes = false
+
+  sources = [
     "//brave/components/assist_ranker/ranker_model_loader_impl_unittest.cc",
     "//brave/components/brave_private_cdn/private_cdn_helper_unittest.cc",
     "//brave/components/brave_search/browser/brave_search_default_host_unittest.cc",
@@ -130,6 +160,28 @@ test("brave_unit_tests") {
     "//brave/components/translate/core/browser/translate_language_list_unittest.cc",
     "//brave/components/weekly_storage/daily_storage_unittest.cc",
     "//brave/components/weekly_storage/weekly_storage_unittest.cc",
+  ]
+
+  deps = [
+    ":test_support",
+    "//base",
+    "//base/test:test_support",
+    "//chrome/test:test_support",
+  ]
+}
+
+test("brave_unit_tests") {
+  testonly = true
+
+  sources = [
+    "../../components/domain_reliability/test_util.cc",
+    "../../components/domain_reliability/test_util.h",
+    "//brave/browser/brave_content_browser_client_unittest.cc",
+    "//brave/browser/brave_resources_util_unittest.cc",
+    "//brave/browser/browsing_data/brave_browsing_data_remover_delegate_unittest.cc",
+    "//brave/browser/download/brave_download_item_model_unittest.cc",
+    "//brave/browser/profiles/profile_util_unittest.cc",
+    "//brave/common/brave_content_client_unittest.cc",
     "//brave/third_party/libaddressinput/chromium/chrome_metadata_source_unittest.cc",
     "//brave/vendor/brave_base/random_unittest.cc",
     "//chrome/browser/custom_handlers/test_protocol_handler_registry_delegate.cc",
@@ -140,6 +192,9 @@ test("brave_unit_tests") {
   defines = brave_service_key_defines
 
   deps = [
+    ":chromium_src_unit_tests",
+    ":components_unit_tests",
+    ":net_unit_tests",
     ":test_support",
     "//brave/app:command_ids",
     "//brave/app/theme:brave_theme_resources_grit",
